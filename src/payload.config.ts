@@ -47,8 +47,8 @@ export default buildConfig({
     Users,
   ],
   editor: lexicalEditor(),
-  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
-  secret: process.env.PAYLOAD_SECRET || 'fallback-secret',
+  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || 'https://payload-cms-app.onrender.com',
+  secret: process.env.PAYLOAD_SECRET || 'fallback-secret-key',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
@@ -57,7 +57,7 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URI || process.env.DATABASE_URL || '',
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     },
-    push: true, // Forces schema sync so Neon creates missing tables automatically on startup
+    push: true, // Forces schema creation on PostgreSQL in production
   }),
   sharp,
   plugins: [],
