@@ -8,18 +8,11 @@ export const Blogs: CollectionConfig = {
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'categories', 'updatedAt'],
     preview: doc => {
-      return `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/api/preview?url=${encodeURIComponent(
-        `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/blogs/${doc.slug}`,
-      )}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
-    },
-    hooks: {
-      beforeDuplicate: ({ data }) => {
-        return {
-          ...data,
-          title: data.title ? `${data.title} (Copy)` : 'Copy',
-          slug: data.slug ? `${data.slug}-copy` : 'copy',
-        }
-      },
+      const serverUrl = process.env.PAYLOAD_PUBLIC_SERVER_URL || ''
+      const secret = process.env.PAYLOAD_PUBLIC_DRAFT_SECRET || ''
+      return `${serverUrl}/api/preview?url=${encodeURIComponent(
+        `${serverUrl}/blogs/${doc?.slug || ''}`,
+      )}&secret=${secret}`
     },
   },
   hooks: {
