@@ -55,9 +55,12 @@ export default buildConfig({
     pool: {
       connectionString:
         process.env.DATABASE_URI ||
-        process.env.DATABASE_URL ||
         process.env.POSTGRES_URL ||
-        'postgres://postgres:postgres@127.0.0.1:5432/payload',
+        process.env.DATABASE_URL ||
+        (process.env.NODE_ENV === 'production'
+          ? ''
+          : 'postgres://postgres:postgres@127.0.0.1:5432/payload'),
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
       max: 10,
       connectionTimeoutMillis: 5000,
       idleTimeoutMillis: 30000,
