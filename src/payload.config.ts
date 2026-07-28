@@ -47,13 +47,13 @@ export default buildConfig({
     Users,
   ],
   editor: lexicalEditor(),
-  secret: process.env.PAYLOAD_SECRET || '',
+  secret: process.env.PAYLOAD_SECRET || 'payload-secret-key-fallback-for-build-environment-32-chars-minimum',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URL || '',
+      connectionString: process.env.DATABASE_URL || 'postgres://postgres:postgres@127.0.0.1:5432/payload',
       max: 10,
       connectionTimeoutMillis: 5000,
       idleTimeoutMillis: 30000,

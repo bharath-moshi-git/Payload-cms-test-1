@@ -16,25 +16,31 @@ type BlogPageProps = {
 
 const BlogPage = async ({ params }: BlogPageProps) => {
   const { slug } = await params
-  const payload = await getPayload({
-    config: configPromise,
-  })
+  let blog: any = null
 
-  const { isEnabled: isDraftMode } = await draftMode()
+  try {
+    const payload = await getPayload({
+      config: configPromise,
+    })
 
-  const result = await payload.find({
-    collection: 'blogs',
-    where: {
-      slug: {
-        equals: slug,
+    const { isEnabled: isDraftMode } = await draftMode()
+
+    const result = await payload.find({
+      collection: 'blogs',
+      where: {
+        slug: {
+          equals: slug,
+        },
       },
-    },
-    draft: isDraftMode,
-    limit: 1,
-    depth: 2,
-  })
+      draft: isDraftMode,
+      limit: 1,
+      depth: 2,
+    })
 
-  const blog = result.docs[0]
+    blog = result.docs[0]
+  } catch (err) {
+    console.error('Error fetching blog page:', err)
+  }
 
   if (!blog) {
     return notFound()
@@ -103,16 +109,21 @@ const BlogPage = async ({ params }: BlogPageProps) => {
 export default BlogPage
 
 export async function generateStaticParams() {
-  const payload = await getPayload({
-    config: configPromise,
-  })
+  try {
+    const payload = await getPayload({
+      config: configPromise,
+    })
 
-  const blogs = await payload.find({
-    collection: 'blogs',
-    limit: 100,
-  })
+    const blogs = await payload.find({
+      collection: 'blogs',
+      limit: 100,
+    })
 
-  return blogs.docs.map(blog => ({
-    slug: blog.slug,
-  }))
+    return blogs.docs.map(blog => ({
+      slug: blog.slug,
+    }))
+  } catch (err) {
+    console.error('Error generating static params for blogs:', err)
+    return []
+  }
 }
