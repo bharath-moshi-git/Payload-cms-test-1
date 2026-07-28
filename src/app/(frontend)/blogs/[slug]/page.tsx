@@ -74,20 +74,23 @@ const BlogPage = async ({ params }: BlogPageProps) => {
             <div className="mt-16">
               <h2 className="text-3xl font-bold">Related Blogs</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
-                {blog.relatedBlogs.map(relatedBlog => (
-                  <Link href={`/blogs/${relatedBlog.slug}`} key={relatedBlog.id}>
-                    <div className="awwwards-glass rounded-3xl p-8 sm:p-12 border border-white/10 text-slate-300 whitespace-pre-line text-lg leading-relaxed font-sans shadow-2xl">
-                      {relatedBlog.mainImage && typeof relatedBlog.mainImage === 'object' && (
-                        <img
-                          src={(relatedBlog.mainImage as Media).url}
-                          alt={relatedBlog.title}
-                          className="rounded-t-3xl"
-                        />
-                      )}
-                      <h2 className="text-2xl font-bold mt-4">{relatedBlog.title}</h2>
-                    </div>
-                  </Link>
-                ))}
+                {blog.relatedBlogs.map((relatedBlog) => {
+                  if (typeof relatedBlog !== 'object' || relatedBlog === null) return null
+                  return (
+                    <Link href={`/blogs/${relatedBlog.slug}`} key={relatedBlog.id}>
+                      <div className="awwwards-glass rounded-3xl p-8 sm:p-12 border border-white/10 text-slate-300 whitespace-pre-line text-lg leading-relaxed font-sans shadow-2xl">
+                        {relatedBlog.mainImage && typeof relatedBlog.mainImage === 'object' && (
+                          <img
+                            src={(relatedBlog.mainImage as Media).url || ''}
+                            alt={relatedBlog.title}
+                            className="rounded-t-3xl"
+                          />
+                        )}
+                        <h2 className="text-2xl font-bold mt-4">{relatedBlog.title}</h2>
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
             </div>
           )}
