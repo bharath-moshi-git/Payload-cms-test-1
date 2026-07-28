@@ -62,7 +62,7 @@ export default buildConfig({
           : 'postgres://postgres:postgres@127.0.0.1:5432/payload'),
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     },
-    push: process.env.PAYLOAD_DB_PUSH === 'false' ? false : true,
+    push: true,
   }),
   sharp,
   plugins: [],
