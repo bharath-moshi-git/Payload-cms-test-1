@@ -48,21 +48,16 @@ export default buildConfig({
   ],
   editor: lexicalEditor(),
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
-  secret: process.env.PAYLOAD_SECRET || 'payload-secret-key-fallback-for-build-environment-32-chars-minimum',
+  secret: process.env.PAYLOAD_SECRET || 'fallback-secret',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: postgresAdapter({
     pool: {
-      connectionString:
-        process.env.DATABASE_URI ||
-        process.env.DATABASE_URL ||
-        (process.env.NODE_ENV === 'production'
-          ? ''
-          : 'postgres://postgres:postgres@127.0.0.1:5432/payload'),
+      connectionString: process.env.DATABASE_URI || process.env.DATABASE_URL || '',
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     },
-    push: true,
+    push: true, // Forces schema sync so Neon creates missing tables automatically on startup
   }),
   sharp,
   plugins: [],
