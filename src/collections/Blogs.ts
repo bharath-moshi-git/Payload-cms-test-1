@@ -12,17 +12,17 @@ export const Blogs: CollectionConfig = {
         `${process.env.PAYLOAD_PUBLIC_SERVER_URL}/blogs/${doc.slug}`,
       )}&secret=${process.env.PAYLOAD_PUBLIC_DRAFT_SECRET}`
     },
-  },
-  hooks: {
-    beforeDuplicate: [
-      ({ data }) => {
+    hooks: {
+      beforeDuplicate: ({ data }) => {
         return {
           ...data,
           title: data.title ? `${data.title} (Copy)` : 'Copy',
           slug: data.slug ? `${data.slug}-copy` : 'copy',
         }
       },
-    ],
+    },
+  },
+  hooks: {
     beforeChange: [
       ({ req, data }) => {
         if (req.user) {

@@ -6,17 +6,15 @@ export const Projects: CollectionConfig = {
     group: 'Projects',
     useAsTitle: 'title',
     defaultColumns: ['title', 'slug', 'price', 'location', 'updatedAt'],
-  },
-  hooks: {
-    beforeDuplicate: [
-      ({ data }) => {
+    hooks: {
+      beforeDuplicate: ({ data }) => {
         return {
           ...data,
           title: data.title ? `${data.title} (Copy)` : 'Copy',
           slug: data.slug ? `${data.slug}-copy` : 'copy',
         }
       },
-    ],
+    },
   },
   access: {
     read: () => true,

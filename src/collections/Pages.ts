@@ -5,17 +5,15 @@ export const Pages: CollectionConfig = {
   admin: {
     group: 'Pages',
     useAsTitle: 'title',
-  },
-  hooks: {
-    beforeDuplicate: [
-      ({ data }) => {
+    hooks: {
+      beforeDuplicate: ({ data }) => {
         return {
           ...data,
           title: data.title ? `${data.title} (Copy)` : 'Copy',
           slug: data.slug ? `${data.slug}-copy` : 'copy',
         }
       },
-    ],
+    },
   },
   access: {
     read: () => true,
