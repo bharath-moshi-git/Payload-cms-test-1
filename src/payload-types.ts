@@ -67,8 +67,20 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
+    'home-page': HomePage;
+    'about-page': AboutPage;
+    'contact-page': ContactPage;
+    'careers-page': CareersPage;
+    pages: Page;
+    blogs: Blog;
+    'blog-categories': BlogCategory;
+    'contact-submissions': ContactSubmission;
+    'career-applications': CareerApplication;
+    projects: Project;
+    'project-categories': ProjectCategory;
+    locations: Location;
     media: Media;
+    users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -76,15 +88,27 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
+    'home-page': HomePageSelect<false> | HomePageSelect<true>;
+    'about-page': AboutPageSelect<false> | AboutPageSelect<true>;
+    'contact-page': ContactPageSelect<false> | ContactPageSelect<true>;
+    'careers-page': CareersPageSelect<false> | CareersPageSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    blogs: BlogsSelect<false> | BlogsSelect<true>;
+    'blog-categories': BlogCategoriesSelect<false> | BlogCategoriesSelect<true>;
+    'contact-submissions': ContactSubmissionsSelect<false> | ContactSubmissionsSelect<true>;
+    'career-applications': CareerApplicationsSelect<false> | CareerApplicationsSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    'project-categories': ProjectCategoriesSelect<false> | ProjectCategoriesSelect<true>;
+    locations: LocationsSelect<false> | LocationsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
   globals: {};
@@ -119,10 +143,409 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page".
+ */
+export interface HomePage {
+  id: number;
+  title: string;
+  header?: {
+    logoText?: string | null;
+    logoSubtext?: string | null;
+    headerCtaText?: string | null;
+    headerCtaLink?: string | null;
+  };
+  hero?: {
+    heading?: string | null;
+    headingHighlight?: string | null;
+    subheading?: string | null;
+    ctaText?: string | null;
+    ctaLink?: string | null;
+    secondaryCtaText?: string | null;
+    secondaryCtaLink?: string | null;
+  };
+  features?: {
+    heading?: string | null;
+    subheading?: string | null;
+    items?:
+      | {
+          title: string;
+          description?: string | null;
+          icon?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  services?: {
+    heading?: string | null;
+    subheading?: string | null;
+    items?:
+      | {
+          title: string;
+          description?: string | null;
+          icon?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  testimonials?: {
+    heading?: string | null;
+    subheading?: string | null;
+    items?:
+      | {
+          quote: string;
+          author?: string | null;
+          location?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  cta?: {
+    heading?: string | null;
+    subheading?: string | null;
+    buttonText?: string | null;
+    buttonLink?: string | null;
+    contactEmail?: string | null;
+    contactPhone?: string | null;
+  };
+  blogs?: {
+    heading?: string | null;
+    subheading?: string | null;
+    selectedBlogs?: (number | Blog)[] | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blogs".
+ */
+export interface Blog {
+  id: number;
+  title: string;
+  excerpt?: string | null;
+  mainImage: number | Media;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  categories?: (number | BlogCategory)[] | null;
+  relatedBlogs?: (number | Blog)[] | null;
+  slug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog-categories".
+ */
+export interface BlogCategory {
+  id: number;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about-page".
+ */
+export interface AboutPage {
+  id: number;
+  title: string;
+  header?: {
+    logoText?: string | null;
+    logoSubtext?: string | null;
+    headerCtaText?: string | null;
+    headerCtaLink?: string | null;
+  };
+  hero?: {
+    heading?: string | null;
+    headingHighlight?: string | null;
+    subheading?: string | null;
+    fallbackImage?: (number | null) | Media;
+    fallbackImageUrl?: string | null;
+    ctaText?: string | null;
+    ctaLink?: string | null;
+  };
+  story?: {
+    heading?: string | null;
+    bodyContent?: string | null;
+  };
+  values?: {
+    heading?: string | null;
+    items?:
+      | {
+          title: string;
+          description?: string | null;
+          icon?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-page".
+ */
+export interface ContactPage {
+  id: number;
+  title: string;
+  header?: {
+    logoText?: string | null;
+    logoSubtext?: string | null;
+    headerCtaText?: string | null;
+    headerCtaLink?: string | null;
+  };
+  hero?: {
+    heading?: string | null;
+    headingHighlight?: string | null;
+    subheading?: string | null;
+    fallbackImageUrl?: string | null;
+  };
+  contactInfo?: {
+    heading?: string | null;
+    address?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    workingHours?: string | null;
+  };
+  formSettings?: {
+    formHeading?: string | null;
+    formSubheading?: string | null;
+    submitButtonText?: string | null;
+    successMessage?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "careers-page".
+ */
+export interface CareersPage {
+  id: number;
+  title: string;
+  header?: {
+    logoText?: string | null;
+    logoSubtext?: string | null;
+    headerCtaText?: string | null;
+    headerCtaLink?: string | null;
+  };
+  hero?: {
+    heading?: string | null;
+    headingHighlight?: string | null;
+    subheading?: string | null;
+    fallbackImageUrl?: string | null;
+  };
+  positions?: {
+    sectionHeading?: string | null;
+    sectionSubheading?: string | null;
+    items?:
+      | {
+          title: string;
+          department?: string | null;
+          location?: string | null;
+          type?: string | null;
+          description?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  formSettings?: {
+    formHeading?: string | null;
+    formSubheading?: string | null;
+    submitButtonText?: string | null;
+    successMessage?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  /**
+   * URL path for this page (e.g. "about", "services")
+   */
+  slug: string;
+  bodyContent?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-submissions".
+ */
+export interface ContactSubmission {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string | null;
+  subject?: string | null;
+  message: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "career-applications".
+ */
+export interface CareerApplication {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  position: string;
+  resume: number | Media;
+  coverLetter?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: number;
+  title: string;
+  /**
+   * URL path for this project (e.g. "aarde-residence")
+   */
+  slug: string;
+  /**
+   * e.g. $1.5M or Rs. 4.5 Cr onwards
+   */
+  price?: string | null;
+  description?: string | null;
+  category: (number | ProjectCategory)[];
+  location: number | Location;
+  heroImage?: (number | null) | Media;
+  heroImageUrl?: string | null;
+  amenities?: {
+    heading?: string | null;
+    subheading?: string | null;
+    items?:
+      | {
+          title: string;
+          description?: string | null;
+          icon?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  gallery?: {
+    heading?: string | null;
+    subheading?: string | null;
+    images?:
+      | {
+          image?: (number | null) | Media;
+          imageUrl?: string | null;
+          isVideo?: boolean | null;
+          videoUrl?: string | null;
+          caption?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  reviews?: {
+    heading?: string | null;
+    subheading?: string | null;
+    items?:
+      | {
+          author: string;
+          role?: string | null;
+          quote: string;
+          rating?: number | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  locationMap?: {
+    heading?: string | null;
+    address?: string | null;
+    mapUrl?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    nearbyPlaces?:
+      | {
+          name: string;
+          distance?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project-categories".
+ */
+export interface ProjectCategory {
+  id: number;
+  name: string;
+  /**
+   * URL slug (e.g. villa, apartment)
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locations".
+ */
+export interface Location {
+  id: number;
+  name: string;
+  /**
+   * URL slug (e.g. coorg, bangalore)
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -144,29 +567,10 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -183,20 +587,68 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'home-page';
+        value: number | HomePage;
+      } | null)
+    | ({
+        relationTo: 'about-page';
+        value: number | AboutPage;
+      } | null)
+    | ({
+        relationTo: 'contact-page';
+        value: number | ContactPage;
+      } | null)
+    | ({
+        relationTo: 'careers-page';
+        value: number | CareersPage;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'blogs';
+        value: number | Blog;
+      } | null)
+    | ({
+        relationTo: 'blog-categories';
+        value: number | BlogCategory;
+      } | null)
+    | ({
+        relationTo: 'contact-submissions';
+        value: number | ContactSubmission;
+      } | null)
+    | ({
+        relationTo: 'career-applications';
+        value: number | CareerApplication;
+      } | null)
+    | ({
+        relationTo: 'projects';
+        value: number | Project;
+      } | null)
+    | ({
+        relationTo: 'project-categories';
+        value: number | ProjectCategory;
+      } | null)
+    | ({
+        relationTo: 'locations';
+        value: number | Location;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -206,10 +658,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -229,11 +681,414 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-page_select".
+ */
+export interface HomePageSelect<T extends boolean = true> {
+  title?: T;
+  header?:
+    | T
+    | {
+        logoText?: T;
+        logoSubtext?: T;
+        headerCtaText?: T;
+        headerCtaLink?: T;
+      };
+  hero?:
+    | T
+    | {
+        heading?: T;
+        headingHighlight?: T;
+        subheading?: T;
+        ctaText?: T;
+        ctaLink?: T;
+        secondaryCtaText?: T;
+        secondaryCtaLink?: T;
+      };
+  features?:
+    | T
+    | {
+        heading?: T;
+        subheading?: T;
+        items?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              icon?: T;
+              id?: T;
+            };
+      };
+  services?:
+    | T
+    | {
+        heading?: T;
+        subheading?: T;
+        items?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              icon?: T;
+              id?: T;
+            };
+      };
+  testimonials?:
+    | T
+    | {
+        heading?: T;
+        subheading?: T;
+        items?:
+          | T
+          | {
+              quote?: T;
+              author?: T;
+              location?: T;
+              id?: T;
+            };
+      };
+  cta?:
+    | T
+    | {
+        heading?: T;
+        subheading?: T;
+        buttonText?: T;
+        buttonLink?: T;
+        contactEmail?: T;
+        contactPhone?: T;
+      };
+  blogs?:
+    | T
+    | {
+        heading?: T;
+        subheading?: T;
+        selectedBlogs?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about-page_select".
+ */
+export interface AboutPageSelect<T extends boolean = true> {
+  title?: T;
+  header?:
+    | T
+    | {
+        logoText?: T;
+        logoSubtext?: T;
+        headerCtaText?: T;
+        headerCtaLink?: T;
+      };
+  hero?:
+    | T
+    | {
+        heading?: T;
+        headingHighlight?: T;
+        subheading?: T;
+        fallbackImage?: T;
+        fallbackImageUrl?: T;
+        ctaText?: T;
+        ctaLink?: T;
+      };
+  story?:
+    | T
+    | {
+        heading?: T;
+        bodyContent?: T;
+      };
+  values?:
+    | T
+    | {
+        heading?: T;
+        items?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              icon?: T;
+              id?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-page_select".
+ */
+export interface ContactPageSelect<T extends boolean = true> {
+  title?: T;
+  header?:
+    | T
+    | {
+        logoText?: T;
+        logoSubtext?: T;
+        headerCtaText?: T;
+        headerCtaLink?: T;
+      };
+  hero?:
+    | T
+    | {
+        heading?: T;
+        headingHighlight?: T;
+        subheading?: T;
+        fallbackImageUrl?: T;
+      };
+  contactInfo?:
+    | T
+    | {
+        heading?: T;
+        address?: T;
+        email?: T;
+        phone?: T;
+        workingHours?: T;
+      };
+  formSettings?:
+    | T
+    | {
+        formHeading?: T;
+        formSubheading?: T;
+        submitButtonText?: T;
+        successMessage?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "careers-page_select".
+ */
+export interface CareersPageSelect<T extends boolean = true> {
+  title?: T;
+  header?:
+    | T
+    | {
+        logoText?: T;
+        logoSubtext?: T;
+        headerCtaText?: T;
+        headerCtaLink?: T;
+      };
+  hero?:
+    | T
+    | {
+        heading?: T;
+        headingHighlight?: T;
+        subheading?: T;
+        fallbackImageUrl?: T;
+      };
+  positions?:
+    | T
+    | {
+        sectionHeading?: T;
+        sectionSubheading?: T;
+        items?:
+          | T
+          | {
+              title?: T;
+              department?: T;
+              location?: T;
+              type?: T;
+              description?: T;
+              id?: T;
+            };
+      };
+  formSettings?:
+    | T
+    | {
+        formHeading?: T;
+        formSubheading?: T;
+        submitButtonText?: T;
+        successMessage?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  bodyContent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blogs_select".
+ */
+export interface BlogsSelect<T extends boolean = true> {
+  title?: T;
+  excerpt?: T;
+  mainImage?: T;
+  content?: T;
+  categories?: T;
+  relatedBlogs?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blog-categories_select".
+ */
+export interface BlogCategoriesSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-submissions_select".
+ */
+export interface ContactSubmissionsSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  phone?: T;
+  subject?: T;
+  message?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "career-applications_select".
+ */
+export interface CareerApplicationsSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  phone?: T;
+  position?: T;
+  resume?: T;
+  coverLetter?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects_select".
+ */
+export interface ProjectsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  price?: T;
+  description?: T;
+  category?: T;
+  location?: T;
+  heroImage?: T;
+  heroImageUrl?: T;
+  amenities?:
+    | T
+    | {
+        heading?: T;
+        subheading?: T;
+        items?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              icon?: T;
+              id?: T;
+            };
+      };
+  gallery?:
+    | T
+    | {
+        heading?: T;
+        subheading?: T;
+        images?:
+          | T
+          | {
+              image?: T;
+              imageUrl?: T;
+              isVideo?: T;
+              videoUrl?: T;
+              caption?: T;
+              id?: T;
+            };
+      };
+  reviews?:
+    | T
+    | {
+        heading?: T;
+        subheading?: T;
+        items?:
+          | T
+          | {
+              author?: T;
+              role?: T;
+              quote?: T;
+              rating?: T;
+              id?: T;
+            };
+      };
+  locationMap?:
+    | T
+    | {
+        heading?: T;
+        address?: T;
+        mapUrl?: T;
+        latitude?: T;
+        longitude?: T;
+        nearbyPlaces?:
+          | T
+          | {
+              name?: T;
+              distance?: T;
+              id?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project-categories_select".
+ */
+export interface ProjectCategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locations_select".
+ */
+export interface LocationsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -256,24 +1111,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

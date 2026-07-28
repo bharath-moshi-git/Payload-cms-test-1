@@ -26,6 +26,10 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(dirname),
   },
+  experimental: {
+    // Optimize server package imports for faster dev startup
+    optimizePackageImports: ['@payloadcms/ui', '@payloadcms/richtext-lexical', 'lucide-react'],
+  },
 }
 
-export default withPayload(nextConfig, { devBundleServerPackages: false })
+export default withPayload(nextConfig)

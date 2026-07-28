@@ -7,6 +7,18 @@ import sharp from 'sharp'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
+import { Pages } from './collections/Pages'
+import { HomePage } from './collections/pages/HomePage'
+import { AboutUsPage } from './collections/pages/AboutUs'
+import { ContactUsPage } from './collections/pages/ContactUs'
+import { ContactSubmissions } from './collections/ContactSubmissions'
+import { CareersPage } from './collections/pages/Careers'
+import { CareerApplications } from './collections/CareerApplications'
+import { Blogs } from './collections/Blogs'
+import { BlogCategories } from './collections/BlogCategories'
+import { Projects } from './collections/Projects'
+import { ProjectCategories } from './collections/ProjectCategories'
+import { Locations } from './collections/Locations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -18,7 +30,22 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media],
+  collections: [
+    HomePage,
+    AboutUsPage,
+    ContactUsPage,
+    CareersPage,
+    Pages,
+    Blogs,
+    BlogCategories,
+    ContactSubmissions,
+    CareerApplications,
+    Projects,
+    ProjectCategories,
+    Locations,
+    Media,
+    Users,
+  ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -27,6 +54,9 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
+      max: 10,
+      connectionTimeoutMillis: 5000,
+      idleTimeoutMillis: 30000,
     },
   }),
   sharp,
