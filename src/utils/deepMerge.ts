@@ -12,7 +12,7 @@ export function isObject(item: any): boolean {
  * @param target
  * @param ...sources
  */
-export default function deepMerge<T, R>(target: T, source: R): T & R {
+export default function deepMerge<T, R>(target: T, source?: R): T & R {
   const output = { ...target } as T & R
   if (isObject(target) && isObject(source)) {
     Object.keys(source).forEach(key => {

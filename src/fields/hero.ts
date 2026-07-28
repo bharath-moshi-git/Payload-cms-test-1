@@ -4,7 +4,7 @@ import deepMerge from '../utils/deepMerge'
 
 type Hero = (overrides?: Partial<Field>) => Field
 
-export const hero: Hero = overrides =>
+export const hero: Hero = (overrides = {}) =>
   deepMerge<Field, Partial<Field>>(
     {
       name: 'hero',
