@@ -60,15 +60,7 @@ export default buildConfig({
         (process.env.NODE_ENV === 'production'
           ? ''
           : 'postgres://postgres:postgres@127.0.0.1:5432/payload'),
-      ssl:
-        process.env.NODE_ENV === 'production' ||
-        (process.env.DATABASE_URI && process.env.DATABASE_URI.includes('sslmode=')) ||
-        (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('sslmode='))
-          ? { rejectUnauthorized: false }
-          : false,
-      max: 10,
-      connectionTimeoutMillis: 10000,
-      idleTimeoutMillis: 30000,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     },
     push: process.env.PAYLOAD_DB_PUSH === 'false' ? false : true,
   }),
