@@ -3,8 +3,8 @@
  * @param item
  * @returns {boolean}
  */
-export function isObject(item: any): boolean {
-  return item && typeof item === 'object' && !Array.isArray(item)
+export function isObject(item: unknown): item is Record<string, any> {
+  return Boolean(item && typeof item === 'object' && !Array.isArray(item))
 }
 
 /**
@@ -20,7 +20,7 @@ export default function deepMerge<T, R>(target: T, source?: R): T & R {
         if (!(key in target)) {
           Object.assign(output, { [key]: source[key] })
         } else {
-          output[key] = deepMerge(target[key], source[key])
+          (output as any)[key] = deepMerge((target as any)[key], source[key])
         }
       } else {
         Object.assign(output, { [key]: source[key] })
