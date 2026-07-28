@@ -57,7 +57,7 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URI || process.env.DATABASE_URL || '',
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     },
-    push: true, // Forces schema creation on PostgreSQL in production
+    push: true, // Auto-creates database tables on startup
   }),
   sharp,
   plugins: [],
