@@ -336,4 +336,3 @@ export default async function ResourcesPage() {
     </div>
   )
 }
-}
