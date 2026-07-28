@@ -5,7 +5,7 @@ import configPromise from '@payload-config'
 import { notFound } from 'next/navigation'
 import { Header } from '../../components/Header'
 import Link from 'next/link'
-import type { Media } from '@/payload-types'
+import type { Blog, Media } from '@/payload-types'
 import RichText from '../../components/RichText'
 
 type BlogPageProps = {
@@ -16,7 +16,7 @@ type BlogPageProps = {
 
 const BlogPage = async ({ params }: BlogPageProps) => {
   const { slug } = await params
-  let blog: any = null
+  let blog: Blog | null = null
 
   try {
     const payload = await getPayload({
