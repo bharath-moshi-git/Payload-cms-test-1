@@ -5,26 +5,27 @@ import configPromise from '@payload-config'
 import Link from 'next/link'
 import { Header } from '../components/Header'
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic'
 
 export default async function ResourcesPage() {
-  const payload = await getPayload({
-    config: configPromise,
-  })
+  let blogs: any[] = []
 
-  const { isEnabled: isDraftMode } = await draftMode()
-
-  let blogs: any[] = [];
   try {
+    const payload = await getPayload({
+      config: configPromise,
+    })
+
+    const { isEnabled: isDraftMode } = await draftMode()
+
     const res = await payload.find({
       collection: 'blogs',
       draft: isDraftMode,
       limit: 20,
       sort: '-createdAt',
     })
-    blogs = res.docs || [];
+    blogs = res.docs || []
   } catch (err) {
-    console.error('Error fetching blogs for resources page:', err);
+    console.error('Error fetching blogs for resources page:', err)
   }
 
   // Pre-configured Case Studies & Featured Articles
