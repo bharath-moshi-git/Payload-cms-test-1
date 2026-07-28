@@ -47,6 +47,7 @@ export default buildConfig({
     Users,
   ],
   editor: lexicalEditor(),
+  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
   secret: process.env.PAYLOAD_SECRET || 'payload-secret-key-fallback-for-build-environment-32-chars-minimum',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -55,16 +56,21 @@ export default buildConfig({
     pool: {
       connectionString:
         process.env.DATABASE_URI ||
-        process.env.POSTGRES_URL ||
         process.env.DATABASE_URL ||
         (process.env.NODE_ENV === 'production'
           ? ''
           : 'postgres://postgres:postgres@127.0.0.1:5432/payload'),
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      ssl:
+        process.env.NODE_ENV === 'production' ||
+        (process.env.DATABASE_URI && process.env.DATABASE_URI.includes('sslmode=')) ||
+        (process.env.DATABASE_URL && process.env.DATABASE_URL.includes('sslmode='))
+          ? { rejectUnauthorized: false }
+          : false,
       max: 10,
-      connectionTimeoutMillis: 5000,
+      connectionTimeoutMillis: 10000,
       idleTimeoutMillis: 30000,
     },
+    push: process.env.PAYLOAD_DB_PUSH === 'false' ? false : true,
   }),
   sharp,
   plugins: [],
