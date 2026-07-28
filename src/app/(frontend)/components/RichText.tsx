@@ -1,7 +1,11 @@
 import React from 'react'
 import { RichText as PayloadRichText } from '@payloadcms/richtext-lexical/react'
 
-const RichText = ({ content }) => {
+type Props = {
+  content: any
+}
+
+const RichText = ({ content }: Props) => {
   if (!content) {
     return null
   }
