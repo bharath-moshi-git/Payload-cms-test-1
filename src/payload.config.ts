@@ -159,8 +159,8 @@ export default buildConfig({
 
     for (const pageItem of defaultPages) {
       try {
-        const count = await payload.count({ collection: pageItem.slug as any, overrideAccess: true })
-        if (count === 0) {
+        const { totalDocs } = await payload.count({ collection: pageItem.slug as any, overrideAccess: true })
+        if (totalDocs === 0) {
           await payload.create({
             collection: pageItem.slug as any,
             data: { title: pageItem.title },
@@ -174,7 +174,7 @@ export default buildConfig({
     }
 
     try {
-      const usersCount = await payload.count({ collection: 'users', overrideAccess: true })
+      const { totalDocs: usersCount } = await payload.count({ collection: 'users', overrideAccess: true })
       console.log('  ✓ Admin Panel Users Collection OK! Total Admin Accounts:', usersCount)
     } catch (err: any) {
       console.error('❌ ADMIN PANEL USERS INITIALIZATION ERROR:')

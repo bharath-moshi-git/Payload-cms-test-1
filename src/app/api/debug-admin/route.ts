@@ -89,7 +89,7 @@ export async function GET() {
   // Check 4: Admin Users Collection Check
   console.log('👤 [CHECK 4/5] Checking Admin Users Collection ("users"):')
   try {
-    const userCount = await payload.count({ collection: 'users', overrideAccess: true })
+    const { totalDocs: userCount } = await payload.count({ collection: 'users', overrideAccess: true })
     console.log('  ✓ Users Collection Readable! Total Admin Users:', userCount)
     diagnostics.checks.adminUsers = { status: 'PASSED', count: userCount }
   } catch (err: any) {
@@ -113,7 +113,7 @@ export async function GET() {
 
   for (const slug of collectionsToTest) {
     try {
-      const count = await payload.count({ collection: slug, overrideAccess: true })
+      const { totalDocs: count } = await payload.count({ collection: slug, overrideAccess: true })
       console.log(`  ✓ Collection '${slug}': OK (${count} entries)`)
       diagnostics.checks.collections[slug] = { status: 'PASSED', count }
     } catch (err: any) {
