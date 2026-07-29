@@ -10,10 +10,11 @@ export const CareerApplications: CollectionConfig = {
   access: {
     // Anyone on the frontend can submit job applications and upload CVs
     create: () => true,
-    // Only authenticated admin users can view, update, or delete applicant entries
+    // Only authenticated admin users can view, update, delete, or access admin for applicant entries
     read: ({ req: { user } }) => Boolean(user),
     update: ({ req: { user } }) => Boolean(user),
     delete: ({ req: { user } }) => Boolean(user),
+    admin: ({ req: { user } }) => Boolean(user),
   },
   fields: [
     {

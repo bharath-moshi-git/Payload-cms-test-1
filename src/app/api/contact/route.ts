@@ -95,9 +95,21 @@ export async function POST(request: Request) {
 }
 
 
+import { headers as getHeaders } from 'next/headers'
+
 export async function GET() {
   try {
     const payload = await getPayload({ config: configPromise })
+    const headers = await getHeaders()
+    const { user } = await payload.auth({ headers })
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized. Only authenticated admin users can view form submissions.' },
+        { status: 401 }
+      )
+    }
+
     const submissions = await payload.find({
       collection: 'contact-submissions',
       limit: 100,

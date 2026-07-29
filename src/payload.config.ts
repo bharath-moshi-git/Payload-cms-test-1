@@ -35,6 +35,10 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    routes: {
+      login: '/login',
+      logout: '/logout',
+    },
   },
   collections: [
     HomePage,
@@ -53,11 +57,9 @@ export default buildConfig({
     Users,
   ],
   editor: lexicalEditor(),
-  serverURL:
-    process.env.NEXT_PUBLIC_SERVER_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '') ||
-    'http://localhost:3000',
+  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
   secret: process.env.PAYLOAD_SECRET || 'fallback-secret-key',
+
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
@@ -72,6 +74,7 @@ export default buildConfig({
   plugins: [],
   onInit: async (payload) => {
     console.log('==================================================')
+    console.log(process.env.VERCEL_URL, "VERCEL_URL")
     console.log('🚀 PAYLOAD CMS & ADMIN PANEL INITIALIZED')
     console.log('  • Connected DB URI:', dbUrl ? dbUrl.replace(/:[^:@]+@/, ':****@') : 'NOT SET')
     console.log('  • SSL Enabled:     ', isNeonOrCloud)
@@ -146,7 +149,29 @@ export default buildConfig({
       console.warn('  ⚠️ Table auto-create check:', dbErr?.message)
     }
 
+    // Auto-seed default page documents if none exist
+    const defaultPages = [
+      { slug: 'home-page', title: 'Home Page Content' },
+      { slug: 'about-page', title: 'About Us Page' },
+      { slug: 'contact-page', title: 'Contact Us Page' },
+      { slug: 'careers-page', title: 'Careers Page' },
+    ]
 
+    for (const pageItem of defaultPages) {
+      try {
+        const count = await payload.count({ collection: pageItem.slug as any, overrideAccess: true })
+        if (count === 0) {
+          await payload.create({
+            collection: pageItem.slug as any,
+            data: { title: pageItem.title },
+            overrideAccess: true,
+          })
+          console.log(`  ✓ Auto-seeded default document for collection: ${pageItem.slug}`)
+        }
+      } catch (err: any) {
+        console.warn(`  ⚠️ Auto-seed check for ${pageItem.slug}:`, err?.message)
+      }
+    }
 
     try {
       const usersCount = await payload.count({ collection: 'users', overrideAccess: true })

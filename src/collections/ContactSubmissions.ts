@@ -10,10 +10,11 @@ export const ContactSubmissions: CollectionConfig = {
   access: {
     // Anyone on the frontend can create a submission
     create: () => true,
-    // Only authenticated admin users can view, update, or delete submissions
+    // Only authenticated admin users can view, update, delete, or access admin for submissions
     read: ({ req: { user } }) => Boolean(user),
     update: ({ req: { user } }) => Boolean(user),
     delete: ({ req: { user } }) => Boolean(user),
+    admin: ({ req: { user } }) => Boolean(user),
   },
   fields: [
     {
