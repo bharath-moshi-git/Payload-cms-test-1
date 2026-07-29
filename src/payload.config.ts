@@ -29,9 +29,17 @@ const isNeonOrCloud =
   dbUrl.includes('sslmode=require') ||
   process.env.NODE_ENV === 'production'
 
+const getServerUrl = () => {
+  if (process.env.NEXT_PUBLIC_SERVER_URL) return process.env.NEXT_PUBLIC_SERVER_URL
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  if (process.env.RENDER_EXTERNAL_URL) return process.env.RENDER_EXTERNAL_URL
+  return ''
+}
+
 export default buildConfig({
   admin: {
     user: Users.slug,
+    access: ({ req: { user } }) => Boolean(user),
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -57,7 +65,7 @@ export default buildConfig({
     Users,
   ],
   editor: lexicalEditor(),
-  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
+  serverURL: getServerUrl(),
   secret: process.env.PAYLOAD_SECRET || 'fallback-secret-key',
 
   typescript: {

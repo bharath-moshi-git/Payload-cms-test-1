@@ -18,7 +18,6 @@ export const Media: CollectionConfig = {
     create: ({ req: { user } }) => Boolean(user),
     update: ({ req: { user } }) => Boolean(user),
     delete: ({ req: { user } }) => Boolean(user),
-    admin: ({ req: { user } }) => Boolean(user),
   },
   fields: [
     {
