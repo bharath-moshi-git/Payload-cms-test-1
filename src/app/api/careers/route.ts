@@ -10,17 +10,21 @@ async function ensureCareerTables(payload: any) {
       await payload.db.pool.query(`
         CREATE TABLE IF NOT EXISTS "media" (
           "id" serial PRIMARY KEY NOT NULL,
-          "alt" text,
+          "alt" text NOT NULL,
           "filename" text,
-          "mime_type" text,
-          "filesize" integer,
-          "width" integer,
-          "height" integer,
-          "focal_x" numeric,
-          "focal_y" numeric,
+          "mimeType" text,
+          "filesize" numeric,
+          "width" numeric,
+          "height" numeric,
+          "focalX" numeric,
+          "focalY" numeric,
           "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
           "created_at" timestamp with time zone DEFAULT now() NOT NULL
         );
+
+        ALTER TABLE "media" ADD COLUMN IF NOT EXISTS "filename" text;
+        ALTER TABLE "media" ADD COLUMN IF NOT EXISTS "mimeType" text;
+        ALTER TABLE "media" ADD COLUMN IF NOT EXISTS "filesize" numeric;
 
         CREATE TABLE IF NOT EXISTS "career_applications" (
           "id" serial PRIMARY KEY NOT NULL,
@@ -40,6 +44,7 @@ async function ensureCareerTables(payload: any) {
   }
 }
 
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData()
@@ -58,9 +63,9 @@ export async function POST(request: Request) {
       )
     }
 
-    // Ensure upload directory exists on Vercel / serverless (/tmp/media)
+    // Ensure upload directory exists on Vercel / serverless (/tmp)
     const targetDir = Boolean(process.env.VERCEL || process.env.NODE_ENV === 'production')
-      ? '/tmp/media'
+      ? '/tmp'
       : path.resolve('media')
 
     try {
@@ -72,6 +77,7 @@ export async function POST(request: Request) {
     }
 
     const payload = await getPayload({ config: configPromise })
+
 
 
     // Step 1: Upload the CV file to Payload Media collection

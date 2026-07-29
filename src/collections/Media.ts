@@ -1,21 +1,11 @@
 import type { CollectionConfig } from 'payload'
 import path from 'path'
-import fs from 'fs'
 
 const getStaticDir = () => {
-  const isServerless = Boolean(process.env.VERCEL || process.env.NODE_ENV === 'production')
-  const dir = isServerless ? '/tmp/media' : path.resolve('media')
-
-  if (typeof window === 'undefined') {
-    try {
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true })
-      }
-    } catch (e) {
-      console.warn('Could not auto-create staticDir:', e)
-    }
+  if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+    return '/tmp'
   }
-  return dir
+  return path.resolve('media')
 }
 
 export const Media: CollectionConfig = {
@@ -37,4 +27,5 @@ export const Media: CollectionConfig = {
     staticDir: getStaticDir(),
   },
 }
+
 
