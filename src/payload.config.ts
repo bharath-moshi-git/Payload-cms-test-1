@@ -70,5 +70,24 @@ export default buildConfig({
   }),
   sharp,
   plugins: [],
+  onInit: async (payload) => {
+    console.log('==================================================')
+    console.log('🚀 PAYLOAD CMS & ADMIN PANEL INITIALIZED')
+    console.log('  • Connected DB URI:', dbUrl ? dbUrl.replace(/:[^:@]+@/, ':****@') : 'NOT SET')
+    console.log('  • SSL Enabled:     ', isNeonOrCloud)
+    console.log('  • Server URL:      ', payload.config.serverURL)
+
+    try {
+      const usersCount = await payload.count({ collection: 'users', overrideAccess: true })
+      console.log('  ✓ Admin Panel Users Collection OK! Total Admin Accounts:', usersCount)
+    } catch (err: any) {
+      console.error('❌ ADMIN PANEL USERS INITIALIZATION ERROR:')
+      console.error('  • Error Code:   ', err?.code || 'N/A')
+      console.error('  • Error Message:', err?.message)
+      console.error('  • Stack Trace:  ', err?.stack)
+    }
+    console.log('==================================================')
+  },
 })
+
 
