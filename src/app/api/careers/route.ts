@@ -2,6 +2,42 @@ import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
+async function ensureCareerTables(payload: any) {
+  try {
+    if (payload.db && payload.db.pool && typeof payload.db.pool.query === 'function') {
+      await payload.db.pool.query(`
+        CREATE TABLE IF NOT EXISTS "media" (
+          "id" serial PRIMARY KEY NOT NULL,
+          "alt" text,
+          "filename" text,
+          "mime_type" text,
+          "filesize" integer,
+          "width" integer,
+          "height" integer,
+          "focal_x" numeric,
+          "focal_y" numeric,
+          "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+          "created_at" timestamp with time zone DEFAULT now() NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS "career_applications" (
+          "id" serial PRIMARY KEY NOT NULL,
+          "name" text NOT NULL,
+          "email" text NOT NULL,
+          "phone" text NOT NULL,
+          "position" text NOT NULL,
+          "resume_id" integer,
+          "cover_letter" text,
+          "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+          "created_at" timestamp with time zone DEFAULT now() NOT NULL
+        );
+      `)
+    }
+  } catch (err) {
+    console.warn('Could not auto-create career tables:', err)
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData()
@@ -26,33 +62,72 @@ export async function POST(request: Request) {
     const bytes = await cvFile.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    const mediaDoc = await payload.create({
-      collection: 'media',
-      data: {
-        alt: `CV Resume - ${name} - ${position}`,
-      },
-      file: {
-        data: buffer,
-        name: cvFile.name,
-        mimetype: cvFile.type || 'application/pdf',
-        size: cvFile.size,
-      },
-      overrideAccess: true,
-    })
+    let mediaDoc: any
+    try {
+      mediaDoc = await payload.create({
+        collection: 'media',
+        data: {
+          alt: `CV Resume - ${name} - ${position}`,
+        },
+        file: {
+          data: buffer,
+          name: cvFile.name,
+          mimetype: cvFile.type || 'application/pdf',
+          size: cvFile.size,
+        },
+        overrideAccess: true,
+      })
+    } catch (err: any) {
+      console.warn('Media upload creation failed, attempting table auto-creation...', err?.message)
+      await ensureCareerTables(payload)
+
+      mediaDoc = await payload.create({
+        collection: 'media',
+        data: {
+          alt: `CV Resume - ${name} - ${position}`,
+        },
+        file: {
+          data: buffer,
+          name: cvFile.name,
+          mimetype: cvFile.type || 'application/pdf',
+          size: cvFile.size,
+        },
+        overrideAccess: true,
+      })
+    }
 
     // Step 2: Create career application document referencing uploaded resume media ID
-    const application = await payload.create({
-      collection: 'career-applications',
-      data: {
-        name,
-        email,
-        phone,
-        position,
-        resume: mediaDoc.id,
-        coverLetter,
-      },
-      overrideAccess: true,
-    })
+    let application: any
+    try {
+      application = await payload.create({
+        collection: 'career-applications',
+        data: {
+          name,
+          email,
+          phone,
+          position,
+          resume: mediaDoc.id,
+          coverLetter,
+        },
+        overrideAccess: true,
+      })
+    } catch (err: any) {
+      console.warn('Career application creation failed, attempting table auto-creation...', err?.message)
+      await ensureCareerTables(payload)
+
+      application = await payload.create({
+        collection: 'career-applications',
+        data: {
+          name,
+          email,
+          phone,
+          position,
+          resume: mediaDoc.id,
+          coverLetter,
+        },
+        overrideAccess: true,
+      })
+    }
 
     console.log('==================================================')
     console.log('💼 NEW CAREER APPLICATION SAVED TO DATABASE:')
@@ -77,16 +152,13 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error('Error processing career application:', error)
 
-    const userErrorMessage = error?.message?.includes('Failed query')
-      ? 'Database is syncing tables. Please try submitting again in a moment.'
-      : error?.message || 'Failed to process job application.'
-
     return NextResponse.json(
-      { error: userErrorMessage },
+      { error: error?.message || 'Failed to process job application.' },
       { status: 500 }
     )
   }
 }
+
 
 export async function GET() {
   try {

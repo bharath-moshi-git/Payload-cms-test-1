@@ -2,6 +2,27 @@ import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
+async function ensureContactSubmissionsTable(payload: any) {
+  try {
+    if (payload.db && payload.db.pool && typeof payload.db.pool.query === 'function') {
+      await payload.db.pool.query(`
+        CREATE TABLE IF NOT EXISTS "contact_submissions" (
+          "id" serial PRIMARY KEY NOT NULL,
+          "name" text NOT NULL,
+          "email" text NOT NULL,
+          "phone" text,
+          "subject" text DEFAULT 'General Inquiry',
+          "message" text NOT NULL,
+          "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+          "created_at" timestamp with time zone DEFAULT now() NOT NULL
+        );
+      `)
+    }
+  } catch (err) {
+    console.warn('Could not auto-create contact_submissions table:', err)
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()
@@ -16,17 +37,36 @@ export async function POST(request: Request) {
 
     const payload = await getPayload({ config: configPromise })
 
-    const submission = await payload.create({
-      collection: 'contact-submissions',
-      data: {
-        name,
-        email,
-        phone: phone || '',
-        subject: subject || 'General Inquiry',
-        message,
-      },
-      overrideAccess: true,
-    })
+    let submission: any
+    try {
+      submission = await payload.create({
+        collection: 'contact-submissions',
+        data: {
+          name,
+          email,
+          phone: phone || '',
+          subject: subject || 'General Inquiry',
+          message,
+        },
+        overrideAccess: true,
+      })
+    } catch (createErr: any) {
+      console.warn('Initial creation failed, attempting table auto-creation in Neon Postgres...', createErr?.message)
+      await ensureContactSubmissionsTable(payload)
+
+      // Retry creation after ensuring table exists
+      submission = await payload.create({
+        collection: 'contact-submissions',
+        data: {
+          name,
+          email,
+          phone: phone || '',
+          subject: subject || 'General Inquiry',
+          message,
+        },
+        overrideAccess: true,
+      })
+    }
 
     console.log('==================================================')
     console.log('📥 NEW CONTACT SUBMISSION SAVED TO DATABASE:')
@@ -44,21 +84,16 @@ export async function POST(request: Request) {
       message: 'Your inquiry has been submitted successfully!',
       submissionId: submission.id,
     })
-
   } catch (error: any) {
     console.error('Error saving contact submission:', error)
     
-    // Provide a helpful error message while avoiding raw database internal dump if DB is reconnecting
-    const userErrorMessage = error?.message?.includes('Failed query')
-      ? 'Database is syncing tables. Please try submitting again in a moment.'
-      : error?.message || 'Failed to submit form inquiry.'
-
     return NextResponse.json(
-      { error: userErrorMessage },
+      { error: error?.message || 'Failed to submit form inquiry.' },
       { status: 500 }
     )
   }
 }
+
 
 export async function GET() {
   try {
