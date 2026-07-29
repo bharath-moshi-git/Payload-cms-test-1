@@ -100,12 +100,52 @@ export default buildConfig({
             "created_at" timestamp with time zone DEFAULT now() NOT NULL,
             "expires_at" timestamp with time zone NOT NULL
           );
+
+          CREATE TABLE IF NOT EXISTS "payload_locked_documents" (
+            "id" serial PRIMARY KEY NOT NULL,
+            "global_slug" text,
+            "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+            "created_at" timestamp with time zone DEFAULT now() NOT NULL
+          );
+
+          CREATE TABLE IF NOT EXISTS "payload_locked_documents_rels" (
+            "id" serial PRIMARY KEY NOT NULL,
+            "order" integer,
+            "parent_id" integer NOT NULL,
+            "path" text NOT NULL,
+            "users_id" integer
+          );
+
+          CREATE TABLE IF NOT EXISTS "payload_preferences" (
+            "id" serial PRIMARY KEY NOT NULL,
+            "key" text,
+            "value" jsonb,
+            "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+            "created_at" timestamp with time zone DEFAULT now() NOT NULL
+          );
+
+          CREATE TABLE IF NOT EXISTS "payload_preferences_rels" (
+            "id" serial PRIMARY KEY NOT NULL,
+            "order" integer,
+            "parent_id" integer NOT NULL,
+            "path" text NOT NULL,
+            "users_id" integer
+          );
+
+          CREATE TABLE IF NOT EXISTS "payload_migrations" (
+            "id" serial PRIMARY KEY NOT NULL,
+            "name" text,
+            "batch" numeric,
+            "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+            "created_at" timestamp with time zone DEFAULT now() NOT NULL
+          );
         `)
-        console.log('  ✓ Verified/Created "users" and "users_sessions" tables in Neon Postgres!')
+        console.log('  ✓ Verified/Created all Payload Admin System Tables in Neon Postgres!')
       }
     } catch (dbErr: any) {
       console.warn('  ⚠️ Table auto-create check:', dbErr?.message)
     }
+
 
 
     try {

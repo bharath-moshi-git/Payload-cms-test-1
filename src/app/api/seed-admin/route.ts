@@ -10,7 +10,7 @@ export async function GET() {
   try {
     const payload = await getPayload({ config: configPromise })
 
-    // Step 1: Ensure "users" and "users_sessions" tables exist in Neon PostgreSQL
+    // Step 1: Ensure all Payload Admin system tables exist in Neon PostgreSQL
     if (payload.db && payload.db.pool && typeof payload.db.pool.query === 'function') {
       await payload.db.pool.query(`
         CREATE TABLE IF NOT EXISTS "users" (
@@ -33,9 +33,49 @@ export async function GET() {
           "created_at" timestamp with time zone DEFAULT now() NOT NULL,
           "expires_at" timestamp with time zone NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS "payload_locked_documents" (
+          "id" serial PRIMARY KEY NOT NULL,
+          "global_slug" text,
+          "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+          "created_at" timestamp with time zone DEFAULT now() NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS "payload_locked_documents_rels" (
+          "id" serial PRIMARY KEY NOT NULL,
+          "order" integer,
+          "parent_id" integer NOT NULL,
+          "path" text NOT NULL,
+          "users_id" integer
+        );
+
+        CREATE TABLE IF NOT EXISTS "payload_preferences" (
+          "id" serial PRIMARY KEY NOT NULL,
+          "key" text,
+          "value" jsonb,
+          "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+          "created_at" timestamp with time zone DEFAULT now() NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS "payload_preferences_rels" (
+          "id" serial PRIMARY KEY NOT NULL,
+          "order" integer,
+          "parent_id" integer NOT NULL,
+          "path" text NOT NULL,
+          "users_id" integer
+        );
+
+        CREATE TABLE IF NOT EXISTS "payload_migrations" (
+          "id" serial PRIMARY KEY NOT NULL,
+          "name" text,
+          "batch" numeric,
+          "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+          "created_at" timestamp with time zone DEFAULT now() NOT NULL
+        );
       `)
-      console.log('  ✓ Verified/Created "users" and "users_sessions" tables in Neon Postgres')
+      console.log('  ✓ Verified/Created all Payload System Tables (users, sessions, locked_docs, preferences) in Neon Postgres')
     }
+
 
     // Step 2: Direct DB query to check if admin user exists
     let existingUsersCount = 0
