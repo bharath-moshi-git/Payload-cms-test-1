@@ -37,6 +37,7 @@ export async function POST(request: Request) {
         mimetype: cvFile.type || 'application/pdf',
         size: cvFile.size,
       },
+      overrideAccess: true,
     })
 
     // Step 2: Create career application document referencing uploaded resume media ID
@@ -50,7 +51,21 @@ export async function POST(request: Request) {
         resume: mediaDoc.id,
         coverLetter,
       },
+      overrideAccess: true,
     })
+
+    console.log('==================================================')
+    console.log('💼 NEW CAREER APPLICATION SAVED TO DATABASE:')
+    console.log('  ID:           ', application.id)
+    console.log('  Applicant Name:', application.name)
+    console.log('  Email:        ', application.email)
+    console.log('  Phone:        ', application.phone)
+    console.log('  Position:     ', application.position)
+    console.log('  Resume ID:    ', mediaDoc.id)
+    console.log('  Resume URL:   ', mediaDoc.url)
+    console.log('  Cover Letter: ', application.coverLetter || 'N/A')
+    console.log('  Timestamp:    ', application.createdAt)
+    console.log('==================================================')
 
     return NextResponse.json({
       success: true,
@@ -58,11 +73,46 @@ export async function POST(request: Request) {
       applicationId: application.id,
       resumeUrl: mediaDoc.url,
     })
+
   } catch (error: any) {
     console.error('Error processing career application:', error)
+
+    const userErrorMessage = error?.message?.includes('Failed query')
+      ? 'Database is syncing tables. Please try submitting again in a moment.'
+      : error?.message || 'Failed to process job application.'
+
     return NextResponse.json(
-      { error: error?.message || 'Failed to process job application.' },
+      { error: userErrorMessage },
       { status: 500 }
     )
   }
 }
+
+export async function GET() {
+  try {
+    const payload = await getPayload({ config: configPromise })
+    const applications = await payload.find({
+      collection: 'career-applications',
+      limit: 100,
+      overrideAccess: true,
+    })
+
+    console.log('==================================================')
+    console.log(`📋 FETCHED ${applications.docs.length} CAREER APPLICATIONS FROM DATABASE:`)
+    console.dir(applications.docs, { depth: null })
+    console.log('==================================================')
+
+    return NextResponse.json({
+      success: true,
+      totalDocs: applications.totalDocs,
+      applications: applications.docs,
+    })
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error?.message || 'Failed to fetch career applications.' },
+      { status: 500 }
+    )
+  }
+}
+
+

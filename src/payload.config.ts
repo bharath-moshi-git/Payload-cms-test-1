@@ -23,6 +23,12 @@ import { Locations } from './collections/Locations'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const dbUrl = process.env.DATABASE_URI || process.env.DATABASE_URL || ''
+const isNeonOrCloud =
+  dbUrl.includes('neon.tech') ||
+  dbUrl.includes('sslmode=require') ||
+  process.env.NODE_ENV === 'production'
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -47,18 +53,22 @@ export default buildConfig({
     Users,
   ],
   editor: lexicalEditor(),
-  serverURL: process.env.NEXT_PUBLIC_SERVER_URL || 'https://payload-cms-app.onrender.com',
+  serverURL:
+    process.env.NEXT_PUBLIC_SERVER_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '') ||
+    'http://localhost:3000',
   secret: process.env.PAYLOAD_SECRET || 'fallback-secret-key',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URI || process.env.DATABASE_URL || '',
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      connectionString: dbUrl,
+      ssl: isNeonOrCloud ? { rejectUnauthorized: false } : false,
     },
-    push: true, // Auto-creates database tables on startup
+    push: true, // Auto-creates database tables on startup/init
   }),
   sharp,
   plugins: [],
 })
+
