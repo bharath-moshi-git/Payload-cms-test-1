@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
+import fs from 'fs'
+import path from 'path'
 
 async function ensureCareerTables(payload: any) {
   try {
@@ -56,7 +58,21 @@ export async function POST(request: Request) {
       )
     }
 
+    // Ensure upload directory exists on Vercel / serverless (/tmp/media)
+    const targetDir = Boolean(process.env.VERCEL || process.env.NODE_ENV === 'production')
+      ? '/tmp/media'
+      : path.resolve('media')
+
+    try {
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true })
+      }
+    } catch (fsErr) {
+      console.warn('Directory check warning:', fsErr)
+    }
+
     const payload = await getPayload({ config: configPromise })
+
 
     // Step 1: Upload the CV file to Payload Media collection
     const bytes = await cvFile.arrayBuffer()
