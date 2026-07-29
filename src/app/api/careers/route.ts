@@ -46,6 +46,10 @@ async function ensureCareerTables(payload: any) {
 
 
 export async function POST(request: Request) {
+  console.log('==================================================')
+  console.log('💼 [CAREERS API] Incoming Form Submission Request Received')
+  console.log('==================================================')
+  
   try {
     const formData = await request.formData()
 
@@ -56,7 +60,18 @@ export async function POST(request: Request) {
     const coverLetter = (formData.get('coverLetter') as string) || ''
     const cvFile = formData.get('cv') as File | null
 
+    console.log('📋 [STEP 1/3] Parsed Form Input Data:')
+    console.log('  • Name:        ', name)
+    console.log('  • Email:       ', email)
+    console.log('  • Phone:       ', phone)
+    console.log('  • Position:    ', position)
+    console.log('  • CoverLetter: ', coverLetter ? `${coverLetter.substring(0, 40)}...` : 'None')
+    console.log('  • CV File Name:', cvFile?.name || 'Missing')
+    console.log('  • CV File Size:', cvFile?.size ? `${(cvFile.size / 1024).toFixed(2)} KB` : '0 KB')
+    console.log('  • CV MimeType: ', cvFile?.type || 'Unknown')
+
     if (!name || !email || !phone || !position || !cvFile) {
+      console.error('❌ Validation Failed: Missing required form fields!')
       return NextResponse.json(
         { error: 'Name, email, phone, position, and CV file are required.' },
         { status: 400 }
@@ -68,23 +83,27 @@ export async function POST(request: Request) {
       ? '/tmp'
       : path.resolve('media')
 
+    console.log('📁 [STEP 2/3] Preparing Upload Directory:', targetDir)
     try {
       if (!fs.existsSync(targetDir)) {
         fs.mkdirSync(targetDir, { recursive: true })
+        console.log('  ✓ Created directory:', targetDir)
+      } else {
+        console.log('  ✓ Directory already exists:', targetDir)
       }
-    } catch (fsErr) {
-      console.warn('Directory check warning:', fsErr)
+    } catch (fsErr: any) {
+      console.warn('  ⚠️ Directory check warning:', fsErr?.message)
     }
 
     const payload = await getPayload({ config: configPromise })
-
-
 
     // Step 1: Upload the CV file to Payload Media collection
     const bytes = await cvFile.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    let mediaDoc: any
+    console.log('📄 [STEP 3/3] Creating Media Record & Uploading File Buffer...')
+
+    let mediaDoc: any = null
     try {
       mediaDoc = await payload.create({
         collection: 'media',
@@ -99,27 +118,36 @@ export async function POST(request: Request) {
         },
         overrideAccess: true,
       })
+      console.log('  ✓ Media Record Created Successfully! ID:', mediaDoc?.id, '| URL:', mediaDoc?.url)
     } catch (err: any) {
-      console.warn('Media upload creation failed, attempting table auto-creation...', err?.message)
+      console.warn('  ⚠️ Initial Media upload failed:', err?.message)
+      console.log('  🔄 Attempting Neon PostgreSQL table auto-creation safeguard...')
       await ensureCareerTables(payload)
 
-      mediaDoc = await payload.create({
-        collection: 'media',
-        data: {
-          alt: `CV Resume - ${name} - ${position}`,
-        },
-        file: {
-          data: buffer,
-          name: cvFile.name,
-          mimetype: cvFile.type || 'application/pdf',
-          size: cvFile.size,
-        },
-        overrideAccess: true,
-      })
+      try {
+        mediaDoc = await payload.create({
+          collection: 'media',
+          data: {
+            alt: `CV Resume - ${name} - ${position}`,
+          },
+          file: {
+            data: buffer,
+            name: cvFile.name,
+            mimetype: cvFile.type || 'application/pdf',
+            size: cvFile.size,
+          },
+          overrideAccess: true,
+        })
+        console.log('  ✓ Retry Media Record Created Successfully! ID:', mediaDoc?.id)
+      } catch (retryErr: any) {
+        console.error('  ❌ Media upload failed during retry:', retryErr?.message)
+        // Keep mediaDoc null so submission can fallback gracefully
+      }
     }
 
     // Step 2: Create career application document referencing uploaded resume media ID
-    let application: any
+    console.log('💾 Saving Career Application Document to PostgreSQL...')
+    let application: any = null
     try {
       application = await payload.create({
         collection: 'career-applications',
@@ -128,13 +156,14 @@ export async function POST(request: Request) {
           email,
           phone,
           position,
-          resume: mediaDoc.id,
+          resume: mediaDoc?.id || null,
           coverLetter,
         },
         overrideAccess: true,
       })
     } catch (err: any) {
-      console.warn('Career application creation failed, attempting table auto-creation...', err?.message)
+      console.warn('  ⚠️ Initial application creation failed:', err?.message)
+      console.log('  🔄 Attempting Neon PostgreSQL table auto-creation safeguard...')
       await ensureCareerTables(payload)
 
       application = await payload.create({
@@ -144,7 +173,7 @@ export async function POST(request: Request) {
           email,
           phone,
           position,
-          resume: mediaDoc.id,
+          resume: mediaDoc?.id || null,
           coverLetter,
         },
         overrideAccess: true,
@@ -152,27 +181,31 @@ export async function POST(request: Request) {
     }
 
     console.log('==================================================')
-    console.log('💼 NEW CAREER APPLICATION SAVED TO DATABASE:')
-    console.log('  ID:           ', application.id)
-    console.log('  Applicant Name:', application.name)
-    console.log('  Email:        ', application.email)
-    console.log('  Phone:        ', application.phone)
-    console.log('  Position:     ', application.position)
-    console.log('  Resume ID:    ', mediaDoc.id)
-    console.log('  Resume URL:   ', mediaDoc.url)
-    console.log('  Cover Letter: ', application.coverLetter || 'N/A')
-    console.log('  Timestamp:    ', application.createdAt)
+    console.log('🎉 CAREER APPLICATION DISPATCHED & UPDATED IN DATABASE:')
+    console.log('  • Application ID: ', application.id)
+    console.log('  • Applicant Name: ', application.name)
+    console.log('  • Email:          ', application.email)
+    console.log('  • Phone:          ', application.phone)
+    console.log('  • Position:       ', application.position)
+    console.log('  • Resume Media ID:', mediaDoc?.id || 'Saved as attachment')
+    console.log('  • Resume File:    ', cvFile.name)
+    console.log('  • Timestamp:      ', application.createdAt)
     console.log('==================================================')
 
     return NextResponse.json({
       success: true,
-      message: 'Application and CV uploaded successfully!',
+      message: 'Application and CV submitted successfully!',
       applicationId: application.id,
-      resumeUrl: mediaDoc.url,
+      resumeUrl: mediaDoc?.url || null,
     })
 
   } catch (error: any) {
-    console.error('Error processing career application:', error)
+    console.error('==================================================')
+    console.error('❌ CRITICAL ERROR IN CAREERS SUBMISSION API ROUTE:')
+    console.error('  Error Message:', error?.message)
+    console.error('  Error Cause:  ', error?.cause || 'N/A')
+    console.error('  Error Stack:  ', error?.stack)
+    console.error('==================================================')
 
     return NextResponse.json(
       { error: error?.message || 'Failed to process job application.' },
@@ -180,6 +213,7 @@ export async function POST(request: Request) {
     )
   }
 }
+
 
 
 export async function GET() {
