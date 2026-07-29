@@ -78,6 +78,28 @@ export default buildConfig({
     console.log('  • Server URL:      ', payload.config.serverURL)
 
     try {
+      if (payload.db && payload.db.pool && typeof payload.db.pool.query === 'function') {
+        await payload.db.pool.query(`
+          CREATE TABLE IF NOT EXISTS "users" (
+            "id" serial PRIMARY KEY NOT NULL,
+            "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+            "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+            "email" text NOT NULL,
+            "reset_password_token" text,
+            "reset_password_expiration" timestamp with time zone,
+            "salt" text,
+            "hash" text,
+            "login_attempts" numeric DEFAULT 0,
+            "lock_until" timestamp with time zone
+          );
+        `)
+        console.log('  ✓ Verified/Created "users" table in Neon Postgres!')
+      }
+    } catch (dbErr: any) {
+      console.warn('  ⚠️ Table auto-create check:', dbErr?.message)
+    }
+
+    try {
       const usersCount = await payload.count({ collection: 'users', overrideAccess: true })
       console.log('  ✓ Admin Panel Users Collection OK! Total Admin Accounts:', usersCount)
     } catch (err: any) {
@@ -89,5 +111,6 @@ export default buildConfig({
     console.log('==================================================')
   },
 })
+
 
 
