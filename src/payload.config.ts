@@ -92,12 +92,21 @@ export default buildConfig({
             "login_attempts" numeric DEFAULT 0,
             "lock_until" timestamp with time zone
           );
+
+          CREATE TABLE IF NOT EXISTS "users_sessions" (
+            "_order" integer NOT NULL DEFAULT 1,
+            "id" varchar PRIMARY KEY NOT NULL,
+            "_parent_id" integer NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+            "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+            "expires_at" timestamp with time zone NOT NULL
+          );
         `)
-        console.log('  ✓ Verified/Created "users" table in Neon Postgres!')
+        console.log('  ✓ Verified/Created "users" and "users_sessions" tables in Neon Postgres!')
       }
     } catch (dbErr: any) {
       console.warn('  ⚠️ Table auto-create check:', dbErr?.message)
     }
+
 
     try {
       const usersCount = await payload.count({ collection: 'users', overrideAccess: true })

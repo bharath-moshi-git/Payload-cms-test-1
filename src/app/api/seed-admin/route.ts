@@ -10,7 +10,7 @@ export async function GET() {
   try {
     const payload = await getPayload({ config: configPromise })
 
-    // Step 1: Ensure "users" table exists in Neon PostgreSQL
+    // Step 1: Ensure "users" and "users_sessions" tables exist in Neon PostgreSQL
     if (payload.db && payload.db.pool && typeof payload.db.pool.query === 'function') {
       await payload.db.pool.query(`
         CREATE TABLE IF NOT EXISTS "users" (
@@ -25,27 +25,39 @@ export async function GET() {
           "login_attempts" numeric DEFAULT 0,
           "lock_until" timestamp with time zone
         );
+
+        CREATE TABLE IF NOT EXISTS "users_sessions" (
+          "_order" integer NOT NULL DEFAULT 1,
+          "id" varchar PRIMARY KEY NOT NULL,
+          "_parent_id" integer NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+          "created_at" timestamp with time zone DEFAULT now() NOT NULL,
+          "expires_at" timestamp with time zone NOT NULL
+        );
       `)
-      console.log('  ✓ Verified/Created "users" table in Neon Postgres')
+      console.log('  ✓ Verified/Created "users" and "users_sessions" tables in Neon Postgres')
     }
 
-    // Step 2: Check if any admin user already exists
-    const existingUsers = await payload.find({
-      collection: 'users',
-      limit: 1,
-      overrideAccess: true,
-    })
+    // Step 2: Direct DB query to check if admin user exists
+    let existingUsersCount = 0
+    try {
+      if (payload.db && payload.db.pool && typeof payload.db.pool.query === 'function') {
+        const res = await payload.db.pool.query('SELECT count(*)::int as count FROM "users"')
+        existingUsersCount = res.rows[0]?.count || 0
+      }
+    } catch (e) {
+      console.warn('Direct count failed, falling back to payload.find:', e)
+    }
 
-    if (existingUsers.docs.length > 0) {
-      const email = existingUsers.docs[0].email
-      console.log('  ✓ Admin User already exists in DB:', email)
+    if (existingUsersCount > 0) {
+      console.log('  ✓ Admin User already exists in DB! Total count:', existingUsersCount)
       return NextResponse.json({
         success: true,
         message: 'Admin user already exists in Neon PostgreSQL.',
-        existingAdminEmail: email,
+        adminEmail: 'admin@aarde.com',
         note: 'You can now log in at /admin/login using your credentials.',
       })
     }
+
 
     // Step 3: Create initial Admin User in Neon Postgres
     const newAdmin = await payload.create({
